@@ -7,26 +7,31 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  onItemPressed(BuildContext context, int index) {
+  onItemPressed(BuildContext context, int index) async {
     switch (index) {
       case 0:
-        var response = StripePaymentService.payViaNewCard(
-          amount: '150',
+        var response = await StripePaymentService.payViaNewCard(
+          amount: '15000',
           currency: 'USD',
         );
-        if (response.success == true) {
-          Scaffold.of(context).showSnackBar(
-            SnackBar(
-              content: Text(response.message),
-              duration: Duration(milliseconds: 1200),
-            ),
-          );
-        }
+        Scaffold.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.message),
+            duration:
+                Duration(milliseconds: response.success == true ? 1200 : 3000),
+          ),
+        );
         break;
       case 1:
         Navigator.pushNamed(context, '/esxisting-card');
         break;
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    StripePaymentService.init();
   }
 
   @override
@@ -42,12 +47,12 @@ class _HomePageState extends State<HomePage> {
             Text text;
             switch (index) {
               case 0:
-                icon = Icon(Icons.add_circle);
-                text = Text('Pay Via Existing Card');
-                break;
-              case 1:
                 icon = Icon(Icons.credit_card);
                 text = Text('Pay Via New Card');
+                break;
+              case 1:
+                icon = Icon(Icons.add_circle);
+                text = Text('Pay Via Existing Card');
                 break;
             }
             return InkWell(
