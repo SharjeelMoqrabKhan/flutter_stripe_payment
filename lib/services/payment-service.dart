@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:stripe_payment/stripe_payment.dart';
 import 'package:http/http.dart' as http;
 
@@ -28,10 +29,41 @@ class StripePaymentService {
     );
   }
 
-  static StripeTransictionResponse payViaExistingCard(
-      {String amount, String currency, card}) {
+  static Future <StripeTransictionResponse> payViaExistingCard({String amount, String currency, CreditCard card}) async {
+    try {
+      var paymentMethod = await StripePayment.createPaymentMethod(
+        PaymentMethodRequest(card: card)
+      );
+      var paymentIntend =
+          await StripePaymentService.createPaymentIntend(amount, currency);
+      var response = await StripePayment.confirmPaymentIntent(PaymentIntent(
+          clientSecret: paymentIntend['client_secret'],
+          paymentMethodId: paymentMethod.id));
+      if (response.status == 'succeeded') {
+        return StripeTransictionResponse(
+          message: 'Transaction Sucessful',
+          success: true,
+        );
+      } else {
+        return StripeTransictionResponse(
+          message: 'Transaction Failed ',
+          success: false,
+        );
+      }
+    } on PlatformException catch (e) {
+      return StripePaymentService.getPlatformException(e);
+    }
+  }
+
+  static getPlatformException(e) {
+    String message = 'something went wrong';
+    if (e.code == 'cancelled') {
+      message = "Transaction failed";
+    }
     return StripeTransictionResponse(
-        message: 'Transaction Sucessful', success: true);
+      message: message,
+      success: false,
+    );
   }
 
   static Future<StripeTransictionResponse> payViaNewCard(
@@ -56,13 +88,12 @@ class StripePaymentService {
           success: false,
         );
       }
-    } catch (e) {
-      return StripeTransictionResponse(
-        message: 'Transaction Faild ${e.toString()}',
-        success: false,
-      );
+    } on PlatformException catch (e) {
+      return StripePaymentService.getPlatformException(e);
     }
   }
+
+
 
   static Future<Map<String, dynamic>> createPaymentIntend(
       String amount, String currency) async {
