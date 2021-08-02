@@ -2,4 +2,5 @@
 
 In this project i tried to used strip payment method and it's impimentation 
 
-![ezgif com-gif-maker](https://user-images.githubusercontent.com/38564835/127836845-d03efef5-a53b-47f2-9ba9-90cb4a02f4b8.gif)
+![ezgif com-gif-maker (2)](https://user-images.githubusercontent.com/38564835/127838060-154797ec-c350-497d-b267-67af368ac0f6.gif)
+
